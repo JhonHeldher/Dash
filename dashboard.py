@@ -14,7 +14,7 @@ from dash_bootstrap_templates import ThemeSwitchAIO
 
 # Crie uma instância do Dash
 # app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
 server = app.server
 
 # app = Dash(__name__, suppress_callback_exceptions=True)
@@ -546,7 +546,7 @@ def graph7(selected_year, toggle):
     figBarPop.update_layout(main_config,  template=template, height=345)
     figBarPop.update_layout({"margin": {"l": 0, "r": 0, "t": 30, "b": 0}})
     return figBarPop
-pass
+
 
 # ↥ Grafico de barra Aumento populacional ↥=========================================================================================================================================
 # if __name__ == '__main__':
@@ -560,8 +560,7 @@ pass
 # app.run_server(debug=True)
  
 if __name__ == "__main__":
- app.run_server(debug=False)
-  
+    app.run_server(debug=False)
  
  
  
