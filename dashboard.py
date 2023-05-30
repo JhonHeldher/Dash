@@ -10,12 +10,12 @@ import json
 
 
 # from app import *
+
 from dash_bootstrap_templates import ThemeSwitchAIO
 
 # Crie uma instância do Dash
 # app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
-server = app.server
 
 # app = Dash(__name__, suppress_callback_exceptions=True)
 # server = app.server
