@@ -4,6 +4,5 @@ plotly
 dash_bootstrap_components
 dash_bootstrap_templates
 plotly_express
-plotly.graph_objects
 pandas
 json
