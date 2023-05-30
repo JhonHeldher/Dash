@@ -1,4 +1,5 @@
  #======================================================================================================================
+import dash
 from dash import html, dcc, Input, Output, Dash
 import dash_bootstrap_components as dbc
 from pandas._libs import properties
@@ -12,9 +13,12 @@ import json
 from dash_bootstrap_templates import ThemeSwitchAIO
 
 # Crie uma instância do Dash
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
-# app = Dash(__name__, suppress_callback_exceptions=True)
+# app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
 server = app.server
+
+# app = Dash(__name__, suppress_callback_exceptions=True)
+# server = app.server
 
 main_config = {
     "hovermode": "x unified",
@@ -374,13 +378,13 @@ def create_indicator(title, value, reference):
 #     template = template_theme1 if toggle else template_theme2
 #     return template
 
-@app.callback( 
-    Output('year-dropdown', 'className'), 
-    Input(ThemeSwitchAIO.ids.switch('theme'), 'value'), 
-) 
-def update_dropdown_class(toggle): 
-    className = 'dropdown-light' if toggle else '“dropdown-dark' 
-    return className
+# @app.callback( 
+#     Output('year-dropdown', 'className'), 
+#     Input(ThemeSwitchAIO.ids.switch('theme'), 'value'), 
+# ) 
+# def update_dropdown_class(toggle): 
+#     className = 'dropdown-light' if toggle else '“dropdown-dark' 
+#     return className
 #=========================================================================================================================================
 
 @app.callback(
