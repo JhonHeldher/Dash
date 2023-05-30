@@ -48,7 +48,7 @@ df_melt_mes_mnd = pd.read_csv('concatenados/df_melt_mes_mnd.csv')
 df_mapa = pd.read_csv('concatenados/df_mapa.csv')
 
 # brazil_geo = json.load(open("Json/brazil_geo.json", "r"))
-brazil_geo = json.load(open("Json/brazil_geo.json", "r"))
+#brazil_geo = json.load(open("Json/brazil_geo.json", "r"))
 state_geo = json.load(open("Json/uf.json", "r", encoding='latin-1'))
 
 for feature in state_geo['features']:
