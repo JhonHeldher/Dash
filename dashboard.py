@@ -1,5 +1,5 @@
  #======================================================================================================================
-from dash import html, dcc, Input, Output, State
+from dash import html, dcc, Input, Output, Dash
 import dash_bootstrap_components as dbc
 from pandas._libs import properties
 import plotly.express as px
@@ -12,8 +12,8 @@ import json
 from dash_bootstrap_templates import ThemeSwitchAIO
 
 # Crie uma instância do Dash
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
-app = dash.Dash(__name__, suppress_callback_exceptions=True)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
+# app = Dash(__name__, suppress_callback_exceptions=True)
 server = app.server
 
 main_config = {
