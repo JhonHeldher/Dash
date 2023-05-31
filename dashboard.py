@@ -1,5 +1,4 @@
  #======================================================================================================================
-import dash
 from dash import html, dcc, Input, Output, Dash
 import dash_bootstrap_components as dbc
 from pandas._libs import properties
@@ -9,17 +8,15 @@ import pandas as pd
 import json
 
 
-# from app import *
-
+# Import bootstrap para o SwitchAIO
 from dash_bootstrap_templates import ThemeSwitchAIO
 
-# Crie uma instância do Dash
-# app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
+# # Criação do app Dash
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP], suppress_callback_exceptions=True)
+server = app.server
 
-# app = Dash(__name__, suppress_callback_exceptions=True)
-# server = app.server
 
+# config principal
 main_config = {
     "hovermode": "x unified",
     "legend": {"yanchor":"top", 
@@ -32,93 +29,74 @@ main_config = {
     "margin": {"l":10, "r":10, "t":10, "b":10},
 }
 
+# Declaramos que o tab_card ocupará toda a altura disponível dentro do contêiner em que está inserido.
 tab_card = {'height': '100%'}
-
+# Declaramos que showTips define se as dicas de ferramenta serão exibidas.
 config_graph={"displayModeBar": False, "showTips": False}
 
+# Os temas usados do bootstrap da Dash
 template_theme1 = "flatly"
 template_theme2 = "darkly"
 url_theme1 = dbc.themes.FLATLY
 url_theme2 = dbc.themes.DARKLY
 
 
+
+# Dataframe com mortalidade, natalidade, aumento população e a população do brasil
 df_card = pd.read_csv('concatenados/df_card.csv')
-
+# Dataframe por mes
 df_melt_mes_mnd = pd.read_csv('concatenados/df_melt_mes_mnd.csv')
-
+# Dataframe por estados
 df_mapa = pd.read_csv('concatenados/df_mapa.csv')
 
-# brazil_geo = json.load(open("Json/brazil_geo.json", "r"))
-#brazil_geo = json.load(open("Json/brazil_geo.json", "r"))
+# Declaramos state_geo como leitura do arquivo json usando o encoding latin-1  
 state_geo = json.load(open("Json/uf.json", "r", encoding='latin-1'))
 
+# Converção de GEOCODIGO de str para int
 for feature in state_geo['features']:
     feature['properties']['GEOCODIGO'] = int(feature['properties']['GEOCODIGO'])
 
-
+# Dicionario para seleção de Mortalidade ou Natalidade
 select_columns_mn = {
-                "Mortos": "Mortos",
-                "nascidos": "nascidos",
+                "Mortos": "Mortalidade",
+                "nascidos": "Natalidade",
                 }
+# Dicionario para seleção do ano
 select_columns_ano = ["todos os anos", "2018", "2019", "2020", "2021", "2022"]
-
-
-# # Criação do app Dash
-# app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-# Criar instância do Flask
-# server = Flask(__name__)
-
-# # Criar instância do Dash com o servidor Flask
-# app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
 
 
 # ↧ layout ↧ ========================================================================================================================================
 
-# app.layout = dbc.Container(children=[      
-layout_page1 = dbc.Container(children=[  
+app.layout = dbc.Container(children=[      
     dbc.Row([
-        dbc.Row([
-            dbc.Card([
-                dbc.CardBody([
-                    dbc.Row([
-                        dbc.Col(
-                            html.Legend("Análise de Mortalidade e Natalidade (nos últimos 5 Anos)",
-                                        style={'font-weight': 'bold', 'font-size': '1.375rem', 'height': '2rem',
-                                            'margin-left': '20px'}),
-                            width=11
-                        ),
-                        dbc.Col(
-                            dbc.Button(
-                                html.I(className="fas fa-arrow-right", style={'height': '1rem', 'width': '2rem', 'color': 'gray', 'margin-left': '-15px'}),
-                                color="link",
-                                href="/page-2",
-                            ),
-                            width=1,
-                            className="text-end"
-                        ),
-                    ])
-                ])
-            ]),
-        ], className='g-2 my-auto'),
-        
         dbc.Col([
             dbc.Row([
                 dbc.Card([
                     dbc.CardBody([
                         dbc.Col([
                             dbc.Row([
+                            
                                 dbc.Row([
-                                    dbc.Col(html.Legend("Escolha o Tema", style={'font-size': '1rem', 'height': '1.5625rem', 'margin-left': '1.25rem'}), width='auto'),
-                                    dbc.Col(ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2])),
+                                    dbc.Col([
+                                        html.Legend(
+                                            "Mortalidade e Natalidade",
+                                            style={'font-weight': 'bold', 'font-size': '1.3rem', 'height': '1rem', 'margin-left': '20px'}
+                                        ),
+                                        html.Span("(nos últimos 5 Anos)", style={'font-size': '90%', 'color': 'dimgray', 'margin-left': '20px'})
+                                    ], width=12)
                                 ]),
+                              
+
+                                dbc.Row([# SwitchAIO de troca de tema
+                                    dbc.Col(html.Legend("Escolha o Tema", style={'font-size': '0.8rem', 'height': '1.5625rem', 'margin-left': '1.25rem'}), width='auto'),
+                                    dbc.Col(ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2])),
+                                ], style={"margin-top": "0.75rem"}),
                                 dbc.Card([
                                     dbc.CardBody([
                                         html.Div([
                                     
                                             html.Div([
-                                                html.P("Selecione o ano:", style={"margin-top": "-0.9375rem",'font-size': '0.75rem'}),
+                                                html.P("Selecione o ano:", style={"margin-top": "-0.9375rem",'font-size': '0.8rem'}),
                                                 dcc.Dropdown(
                                                     id="year-dropdown",
                                                     options=[{"label": str(year), "value": year} for year in select_columns_ano],
@@ -128,7 +106,7 @@ layout_page1 = dbc.Container(children=[
                                             ]),
                                             
                                             html.Div([
-                                                html.P("Selecione o estado:", style={"margin-top": "0.3125rem",'font-size': '0.75rem'}),
+                                                html.P("Selecione o estado:", style={"margin-top": "0.3125rem",'font-size': '0.8rem'}),
                                                 dcc.Dropdown(
                                                     id="state-dropdown",
                                                     options=[{"label": "Brasil", "value": "BR"}] +
@@ -138,7 +116,7 @@ layout_page1 = dbc.Container(children=[
                                                 ),
                                             ]),
                                             html.Div([
-                                                html.P("Selecione entre Mortos e Nascidos:", style={"margin-top": "0.3125rem",'font-size': '0.75rem'}),
+                                                html.P("Selecione entre Mortos e Nascidos:", style={"margin-top": "0.3125rem",'font-size': '0.8rem'}),
                                                 dcc.Dropdown( 
                                                     id="location-dropdown_mn",
                                                     options=[{"label": j, "value": i} for i, j in select_columns_mn.items()],
@@ -154,10 +132,10 @@ layout_page1 = dbc.Container(children=[
                         ])
                     ])
                 ]),
-            ], className='g-2 my-auto', style={'height': '290px'}),
+            ], className='g-2 my-auto', style={'height': '350px'}),
             
             dbc.Row([
-                dbc.Card([
+                dbc.Card([#Card Gráfico Mapa
                     dbc.CardBody([
                         dcc.Graph(id='graph6', className='dbc', config=config_graph)
                     ])
@@ -172,7 +150,7 @@ layout_page1 = dbc.Container(children=[
             dbc.Row([
                 dbc.Col([
                     dbc.Row([
-                        dbc.Col([
+                        dbc.Col([#Card de Mortalidade 
                             dbc.Card([
                                 dbc.CardBody([
                                     dcc.Graph(id='graph1', className='dbc', config=config_graph)
@@ -180,7 +158,7 @@ layout_page1 = dbc.Container(children=[
                             ], style=tab_card),
                         ], width=6),
                         
-                        dbc.Col([
+                        dbc.Col([#Card de Natalidade 
                             dbc.Card([
                                 dbc.CardBody([
                                     dcc.Graph(id='graph2', className='dbc', config=config_graph)
@@ -193,14 +171,14 @@ layout_page1 = dbc.Container(children=[
                 dbc.Col([
                     dbc.Row([
                         dbc.Col([
-                            dbc.Card([
+                            dbc.Card([#Card de Aumento populacional 
                                 dbc.CardBody([
                                     dcc.Graph(id='graph3', className='dbc', config=config_graph)
                                 ])
                             ], style=tab_card),
                         ], width=6),
                         dbc.Col([
-                            dbc.Card([
+                            dbc.Card([#Card de Projeção da População 
                                 dbc.CardBody([
                                     dcc.Graph(id='graph4', className='dbc', config=config_graph)
                                 ])
@@ -235,128 +213,11 @@ layout_page1 = dbc.Container(children=[
                 
     ], className='g-2 my-auto'), 
     
-], fluid=True, style={'max-height': '95vh'})
+], fluid=True, style={'height': '95vh'})
 
 
 
-
-
-# ↧ layout Segunda pag ↧ ========================================================================================================================================
-
-layout_page2 = dbc.Container(
-    children=[
-        dbc.Row([
-            dbc.Row([
-                dbc.Card([
-                    dbc.CardBody([
-                        dbc.Row([
-                            dbc.Col(
-                                html.Legend("Análise de Mortalidade e Natalidade (nos últimos 5 Anos)",
-                                            style={'font-weight': 'bold', 'font-size': '1.375rem', 'height': '2rem',
-                                                'margin-left': '20px'}),
-                                width=11
-                            ),
-                            dbc.Col(
-                                dbc.Button(
-                                    html.I(className="fas fa-arrow-left", style={'height': '1rem', 'width': '2rem', 'color': 'gray', 'margin-left': '-15px'}),
-                                    color="link",
-                                    href="/page-1",                                 
-                                ),
-                                width=1,
-                                className="text-end"
-                            ),
-                        ])
-                    ])
-                ]),
-
-            ], className='g-2 my-auto'),
-            dbc.Col([
-        
-                dbc.Row([
-                    dbc.Card([
-                        dbc.CardBody([
-                            dbc.Col([
-                                dbc.Row([
-                                    dbc.Row([
-                                        dbc.Col(html.Legend("Escolha o Tema", style={'font-size': '1rem', 'height': '1.5625rem', 'margin-left': '1.25rem'}), width='auto'),
-                                        dbc.Col(ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2])),
-                                    ]),
-
-                                    dbc.Card([
-                                        dbc.CardBody([
-                                            html.Div([
-                                        
-                                                html.Div([
-                                                    html.P("Selecione o ano:", style={"margin-top": "-0.9375rem",'font-size': '0.75rem'}),
-                                                    dcc.Dropdown(
-                                                        id="year-dropdown",
-                                                        options=[{"label": str(year), "value": year} for year in select_columns_ano],
-                                                        value="todos os anos",  # Selecionar "todos" como valor inicial
-                                                        style={"margin-top": "-0.625rem"},
-                                                    ),
-                                                ]),
-                                                
-                                                html.Div([
-                                                    html.P("Selecione o estado:", style={"margin-top": "0.3125rem",'font-size': '0.75rem'}),
-                                                    dcc.Dropdown(
-                                                        id="state-dropdown",
-                                                        options=[{"label": "Brasil", "value": "BR"}] +
-                                                                [{"label": state, "value": state} for state in df_mapa["localidade"].unique()],
-                                                        value="BR",
-                                                        style={"margin-top": "-0.625rem"},
-                                                    ),
-                                                ]),
-
-                                                html.Div([
-                                                    html.P("Selecione entre Mortos e Nascidos:", style={"margin-top": "0.3125rem",'font-size': '0.75rem'}),
-                                                    dcc.Dropdown( 
-                                                        id="location-dropdown_mn",
-                                                        options=[{"label": j, "value": i} for i, j in select_columns_mn.items()],
-                                                        value="Mortos",
-                                                        style={"margin-top": "-0.625rem"},
-                                                    ),
-                                                ]),
-                                            ], id="teste"),
-                                        ]),
-                                    ]),
-                                ])
-                            ])
-                        ])
-                    ]),
-                ], className='g-2 my-auto', style={'height': '37%'}),
-                
-                dbc.Row([
-                    dbc.Card([
-                        dbc.CardBody([
-                            dcc.Graph(id='graph6', className='dbc', config=config_graph)
-                        ])
-                    ], style=tab_card),
-                ], className='g-2 my-auto', style={'height': '62%'}),
-            ], sm=12, lg=4, style={'height': 'auto'}),  
-        ], className='g-2 my-auto'), 
-], fluid=True, style={'max-height': '100vh'})       
-
-
-
-
-
-# ↧ callback e Graficos ↧==================↥ layout ↥=======================================================================================================================
-# Define the routes of the pages
-app.layout = html.Div([
-    dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content')
-])
-
-# Define the callback function to render the pages
-@app.callback(Output('page-content', 'children'), [Input('url', 'pathname')])
-def display_page(pathname):
-    if pathname == '/page-2':
-        return layout_page2
-    else:
-        return layout_page1
-
-
-#===============================================
+# ↧ 4 Cards  ↧=========================================================================================================================================
     
 def create_indicator(title, value, reference):
     return go.Figure(
@@ -369,30 +230,14 @@ def create_indicator(title, value, reference):
         )
     )
     
-#===============================================
-# @app.callback( 
-#     Output('teste', 'style'), 
-#     Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
-# ) 
-# def update_style(toggle): 
-#     template = template_theme1 if toggle else template_theme2
-#     return template
+# ↧ 4 Cards  ↧======↥ indicator ↥=========================================
 
-# @app.callback( 
-#     Output('year-dropdown', 'className'), 
-#     Input(ThemeSwitchAIO.ids.switch('theme'), 'value'), 
-# ) 
-# def update_dropdown_class(toggle): 
-#     className = 'dropdown-light' if toggle else '“dropdown-dark' 
-#     return className
-#=========================================================================================================================================
 
 @app.callback(
     Output('graph1', 'figure'),
     Output('graph2', 'figure'),
     Output('graph3', 'figure'),
     Output('graph4', 'figure'),
-    # Input('radio-ano', 'value'),
     Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 )
 def update_graphs(toggle):
@@ -404,10 +249,10 @@ def update_graphs(toggle):
     figText = go.Figure()
     figText.add_trace(go.Indicator(
         mode='number+delta',
-        title = {"text": f"<span style='font-size:150%'>{df_card['ano'].iloc[0]} - Ano com mais Mortes</span><br><span style='font-size:120%; color: dimgray'>em relação aos últimos 5 anos</span><br>"},
+        title = {"text": f"<span style='font-size:180%'>{df_card['ano'].iloc[0]} - Mortalidade</span><br><span style='font-size:130%; color: dimgray'>últimos 5 anos</span><br>"},
         value = df_card_m['Mortes'].iloc[0],
-        number = {'prefix': "", 'font': {'size': 40}},
-        delta = {'relative': True, 'valueformat': '.1%', 'reference': df_card_m['Mortes'].mean(), 'font': {'size': 15}},
+        number = {'prefix': "", 'font': {'size': 35}},
+        delta = {'relative': True, 'valueformat': '.1%', 'reference': df_card_m['Mortes'].mean(), 'font': {'size': 12}},
         delta_increasing_color = "red" # add this line
     ))
 
@@ -418,10 +263,10 @@ def update_graphs(toggle):
 
     figTextN = go.Figure()
     figTextN.add_trace(go.Indicator(mode='number+delta',
-        title = {"text": f"<span style='font-size:150%'>{df_card_n['ano'].iloc[0]} - Ano com mais Nascimento</span><br><span style='font-size:120%; color: dimgray'>em relação aos ultimos 5 anos</span><br>"},
+        title = {"text": f"<span style='font-size:180%'>{df_card_n['ano'].iloc[0]} - Natalidade</span><br><span style='font-size:130%; color: dimgray'>ultimos 5 anos</span><br>"},
         value = df_card_n['nascidos'].iloc[0],
-        number = {'prefix': "", 'font': {'size': 40}},
-        delta = {'relative': True, 'valueformat': '.1%', 'reference': df_card_n['nascidos'].mean(), 'font': {'size': 15}}
+        number = {'prefix': "", 'font': {'size': 35}},
+        delta = {'relative': True, 'valueformat': '.1%', 'reference': df_card_n['nascidos'].mean(), 'font': {'size': 12}}
     ))
         
     df_card_d = df_card[['ano', 'diferenca']].copy()
@@ -429,29 +274,31 @@ def update_graphs(toggle):
 
     figTextD = go.Figure()
     figTextD.add_trace(go.Indicator(mode='number+delta',
-        title = {"text": f"<span style='font-size:150%'>{df_card['ano'].iloc[0]} - Aumento população</span><br><span style='font-size:120%; color: dimgray'>em relação aos últimos 5 anos</span><br>"},
+        title = {"text": f"<span style='font-size:180%'>{df_card['ano'].iloc[0]} - Top Ano</span><br><span style='font-size:130%; color: dimgray;'>Aumento população</span><br>"},
         value = df_card_d['diferenca'].iloc[0],
-        number = {'prefix': "", 'font': {'size': 40}},
-        delta = {'relative': True, 'valueformat': '.1%', 'reference': df_card_d['diferenca'].mean(), 'font': {'size': 15}}
+        number = {'prefix': "", 'font': {'size': 35}},
+        delta = {'relative': True, 'valueformat': '.1%', 'reference': df_card_d['diferenca'].mean(), 'font': {'size': 12}}
     ))
     
     df_card.sort_values(by='valor', ascending=False, inplace=True)
 
     figProjPop = go.Figure()
     figProjPop.add_trace(go.Indicator(mode='number+delta',
-        title = {"text": f"<span style='font-size:150%'>{df_card['ano'].iloc[0]} - Projeção da População</span><br><span style='font-size:120%; color: dimgray'>em relação 2021</span><br>"},
+        title = {"text": f"<span style='font-size:180%'>{df_card['ano'].iloc[0]} - População</span><br><span style='font-size:130%; color: dimgray'>em relação 2021</span><br>"},
         value = df_card['valor'].iloc[0],
-        number = {'prefix': "", 'font': {'size': 40}},
-        delta = {'relative': True, 'valueformat': '.1%', 'reference': df_card['valor'].mean(), 'font': {'size': 15}}
+        number = {'prefix': "", 'font': {'size': 35}},
+        delta = {'relative': True, 'valueformat': '.1%', 'reference': df_card['valor'].mean(), 'font': {'size': 12}}
     ))
     
     figures = [figText, figTextN, figTextD, figProjPop]
     
     for fig in figures:
-        fig.update_layout(main_config,  template=template, height=105)
-        fig.update_layout({"margin": {"l":0, "r":0, "t":50, "b":0}})
+        fig.update_layout(main_config,  template=template, height=85)
+        fig.update_layout({"margin": {"l":0, "r":0, "t":40, "b":0}})
 
     return figures
+
+
 
 # ↧ Grafico de linha Natalidade e Mortalidade ↧ ====================↥ cards Brazil ↥=====================================================================================================================
 
@@ -477,9 +324,11 @@ def graph5(selected_year, toggle):
     figline.update_layout(
         title='Natalidade e Mortalidade',
     )
-    figline.update_layout(main_config, template=template, height=205)
+    figline.update_layout(main_config, template=template, height=260)
     figline.update_layout({"margin": {"l":0, "r":0, "t":30, "b":0}})
     return figline
+
+
 
 # ↧ Mapa ↧=============↥ Grafico de linha Natalidade e Mortalidade ↥============================================================================================================================
 
@@ -500,8 +349,8 @@ def graph6(selected_state, selected_year, toggle):
         filtered_df = df_mapa[(df_mapa["ano"] == int(selected_year)) & (df_mapa["localidade"] == selected_state)]
     
     figMap = px.choropleth(filtered_df, geojson=state_geo, color="Mortos",
-                        locations="localidade",
-                        featureidkey='properties.NOME_UF',
+                        locations="localidade (uid)_y",
+                        featureidkey='properties.GEOCODIGO',
                         color_continuous_scale="Blues",
                         projection="mercator",
                         labels= {'Mortos':'Mortalidade'},
@@ -511,16 +360,19 @@ def graph6(selected_state, selected_year, toggle):
     figMap.update_geos(showcountries=False, showcoastlines=False, showland=False, showrivers=False)
     figMap.update_layout(geo=dict(bgcolor='rgba(0,0,0,0)'))
     
-    figMap.update_layout(main_config,  template=template, height=448)
+    figMap.update_layout(main_config,  template=template, height=530)
     return figMap
 
 
+
 # ↧ Grafico de barra Aumento populacional ↧===============↥ Mapa ↥=========================================================================================================================================
+
 @app.callback(
     Output('graph7', 'figure'),
     Input('year-dropdown', 'value'),
     Input(ThemeSwitchAIO.ids.switch("theme"), "value")
 )
+
 def graph7(selected_year, toggle):
     template = template_theme1 if toggle else template_theme2
     
@@ -543,33 +395,18 @@ def graph7(selected_year, toggle):
     )
 
 
-    figBarPop.update_layout(main_config,  template=template, height=345)
+    figBarPop.update_layout(main_config,  template=template, height=450)
     figBarPop.update_layout({"margin": {"l": 0, "r": 0, "t": 30, "b": 0}})
     return figBarPop
+# ↥ Grafico de barra Aumento populacional ↥=================================================================================================================================================================
 
-
-# ↥ Grafico de barra Aumento populacional ↥=========================================================================================================================================
-# if __name__ == '__main__':
-#     server.run(debug=True)
-    
-# if __name__ == '__main__':
-#  app.run_server(debug=True)
-
-
-#if __name__ == '__main__':
-# app.run_server(debug=True)
  
 if __name__ == "__main__":
-    app.run_server(debug=False)
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+ app.run_server(debug=True)
+
+  
+  
+  
+  
+  
+  
